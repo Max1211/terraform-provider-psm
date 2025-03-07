@@ -37,6 +37,7 @@ func Provider() *schema.Provider {
 			"psm_nat_policy":           resourceNATPolicy(),
 			"psm_user_preferences":     resourcePSMUserPreferences(),
 			"psm_hosts":                resourceHosts(),
+			"psm_mirror_session":       resourceMirrorSession(),
 		},
 		Schema: map[string]*schema.Schema{
 			"user": {

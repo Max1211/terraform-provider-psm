@@ -69,6 +69,16 @@ func resourceNetwork() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"ingress_mirror_session": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Name of mirror session to be applied on ingress traffic",
+			},
+			"egress_mirror_session": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Name of mirror session to be applied on egress traffic",
+			},
 		},
 	}
 }
@@ -97,6 +107,8 @@ type Network struct {
 		Orchestrators         []interface{} `json:"orchestrators"`
 		IngressSecurityPolicy []interface{} `json:"ingress-security-policy" default:"null"`
 		EgressSecurityPolicy  []interface{} `json:"egress-security-policy" default:"null"`
+		IngressMirrorSession  []interface{} `json:"ingress-mirror-session,omitempty"`
+		EgressMirrorSession   []interface{} `json:"egress-mirror-session,omitempty"`
 		FirewallProfile       struct {
 			MaximumCpsPerDistributedServicesEntity      int `json:"maximum-cps-per-distributed-services-entity" default:"-1"`
 			MaximumSessionsPerDistributedServicesEntity int `json:"maximum-sessions-per-distributed-services-entity" default:"-1"`
@@ -138,6 +150,14 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	if v, ok := d.GetOk("egress_security_policy"); ok {
 		network.Spec.EgressSecurityPolicy = []interface{}{v.(string)}
+	}
+
+	// Check if mirror sessions are provided
+	if v, ok := d.GetOk("ingress_mirror_session"); ok {
+		network.Spec.IngressMirrorSession = []interface{}{v.(string)}
+	}
+	if v, ok := d.GetOk("egress_mirror_session"); ok {
+		network.Spec.EgressMirrorSession = []interface{}{v.(string)}
 	}
 
 	// Convert the Network struct to JSON.
@@ -222,6 +242,19 @@ func resourceNetworkRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 	d.Set("name", network.Meta.Name)
 	d.Set("vlan_id", network.Spec.VlanID)
+
+	// Read mirror session configurations if present
+	if len(network.Spec.IngressMirrorSession) > 0 {
+		if mirrorSession, ok := network.Spec.IngressMirrorSession[0].(string); ok {
+			d.Set("ingress_mirror_session", mirrorSession)
+		}
+	}
+
+	if len(network.Spec.EgressMirrorSession) > 0 {
+		if mirrorSession, ok := network.Spec.EgressMirrorSession[0].(string); ok {
+			d.Set("egress_mirror_session", mirrorSession)
+		}
+	}
 
 	return nil
 }
@@ -319,6 +352,25 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if d.HasChange("service_bypass") {
 		networkCurrent.Spec.ServiceBypass = d.Get("service_bypass").(bool)
+	}
+
+	// Handle mirror session changes
+	if d.HasChange("ingress_mirror_session") {
+		if val, ok := d.GetOk("ingress_mirror_session"); ok {
+			newIngressMirrorSession := val.(string)
+			networkCurrent.Spec.IngressMirrorSession = []interface{}{newIngressMirrorSession}
+		} else {
+			networkCurrent.Spec.IngressMirrorSession = nil
+		}
+	}
+
+	if d.HasChange("egress_mirror_session") {
+		if val, ok := d.GetOk("egress_mirror_session"); ok {
+			newEgressMirrorSession := val.(string)
+			networkCurrent.Spec.EgressMirrorSession = []interface{}{newEgressMirrorSession}
+		} else {
+			networkCurrent.Spec.EgressMirrorSession = nil
+		}
 	}
 
 	jsonBytes, err := json.Marshal(networkCurrent)
