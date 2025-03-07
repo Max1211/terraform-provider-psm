@@ -1,14 +1,24 @@
 # psm-provider
 
+## Build Process 
+Currently the provider is distributed and built from Github. Build the code locally and then reference this provider. 
 
-## Installation
-Currently the code is installed directly from Github where there is a Main repo and a Dev repository. Current expections are that the provider is being installed using a Linux or WSL based platform which it has been tested against. You will need to have git tools installed and a functional build system. 
+```
+sudo apt update
+sudo apt install golang git
+git clone git clone https://github.com/farsonic/psm-provider.git
+cd psm-provider
+go mod tidy
+make install 
+```
+
+The code will now be placed into ~/.terraform.d/plugins/local/provider/psm/X.X.X/linux_amd64 where is the version number of the build. This should be referenced as local/provider/psm. Once you install the provider it will be hosted locally with the current **Hostname = local** and the **Namespace = provider**. The Name of the provider is **PSM**.
+
+Within your Terraform infrastructure file (ie main.tf) specify the provider with the following syntax. You can specify the version if wanted but it will always use the latest. If you do specify the version you will need to use the -upgrade switch to force an upgrade. 
 
 ```
 git clone https://github.com/farsonic/psm-provider.git 
 cd psm-provider
-go get google.golang.org/genproto/
-go mod tidy
 make
 ```
 
@@ -16,11 +26,11 @@ Once you install the provider it will be hosted locally with the current **Hostn
 
 Within your Terraform infrastructure file (ie main.tf) specify the provider with the following syntax. 
 
+
 ```
 terraform { 
   required_providers {
    psm = { 
-      version = "0.2.1" 
       source = "local/provider/psm"
   }
  }
@@ -63,6 +73,8 @@ resource "psm_network" "network" {
   allow_session_reuse      = "disable"
   service_bypass           = true
   virtual_router           = "CustomerABC"
+  tenant   = "default" 
+  vlan_id  = 123
 }
 ```
 
@@ -90,6 +102,7 @@ resource "psm_ipcollection" "db02" {
 resource "psm_ipcollection" "dbsrvs" {
   name     = "DatabaseServers"
   ip_collections = ["DatabaseServer01", "DatabaseServer02"]
+  addresses = ["10.10.10.0/24"] 
 }
 ```
 
@@ -116,6 +129,8 @@ resource "psm_rules" "ApplicationA_Stack" {
       labels = {
         "Application" : "SSH"
       }
+      apps = ["SSH"]
+      action = "permit"
     }
 }
 ```
@@ -365,7 +380,6 @@ resource "psm_flow_export_policy" "ipfix" {
 ```
 
 Binding the export policy is currently done manually via the DSS menu on PSM.
-
 
 ### Advanced usage 
 
