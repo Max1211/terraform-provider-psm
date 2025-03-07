@@ -64,6 +64,11 @@ func resourceNetwork() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"ip_fragments_forwarding": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
 		},
 	}
 }
@@ -96,17 +101,18 @@ type Network struct {
 			MaximumCpsPerDistributedServicesEntity      int `json:"maximum-cps-per-distributed-services-entity" default:"-1"`
 			MaximumSessionsPerDistributedServicesEntity int `json:"maximum-sessions-per-distributed-services-entity" default:"-1"`
 		} `json:"firewall-profile"`
-		RouteImportExport  interface{} `json:"route-import-export" default:"null"`
-		Type               string      `json:"type" default:"bridged"`
-		VirtualRouter      string      `json:"virtual-router" default:"default"`
-		VRF                string      `json:"vrf" default:"default"`
-		ConnectionTracking string      `json:"connection-tracking-mode" default:"inherit from vrf"`
-		AllowSessionReuse  string      `json:"allow-session-reuse" default:"inherit from vrf"`
-		VlanID             int         `json:"vlan-id"`
-		SelectVlanOrIpv4   int         `json:"selectVlanOrIpv4" default:"1"`
-		SelectCPS          int         `json:"selectCPS" default:"-1"`
-		SelectSessions     int         `json:"selectSessions" default:"-1"`
-		ServiceBypass      bool        `json:"service-bypass" default:"false"`
+		RouteImportExport     interface{} `json:"route-import-export" default:"null"`
+		Type                  string      `json:"type" default:"bridged"`
+		VirtualRouter         string      `json:"virtual-router" default:"default"`
+		VRF                   string      `json:"vrf" default:"default"`
+		ConnectionTracking    string      `json:"connection-tracking-mode" default:"inherit from vrf"`
+		AllowSessionReuse     string      `json:"allow-session-reuse" default:"inherit from vrf"`
+		IpFragmentsForwarding string      `json:"ip-fragments-forwarding" default:"inherit from vrf"`
+		VlanID                int         `json:"vlan-id"`
+		SelectVlanOrIpv4      int         `json:"selectVlanOrIpv4" default:"1"`
+		SelectCPS             int         `json:"selectCPS" default:"-1"`
+		SelectSessions        int         `json:"selectSessions" default:"-1"`
+		ServiceBypass         bool        `json:"service-bypass" default:"false"`
 	}
 }
 
@@ -124,6 +130,7 @@ func resourceNetworkCreate(ctx context.Context, d *schema.ResourceData, m interf
 	network.Spec.ConnectionTracking = d.Get("connection_tracking_mode").(string)
 	network.Spec.AllowSessionReuse = d.Get("allow_session_reuse").(string)
 	network.Spec.ServiceBypass = d.Get("service_bypass").(bool)
+	network.Spec.IpFragmentsForwarding = d.Get("ip_fragments_forwarding").(string)
 
 	// Check if the ingress_security_policy and egress_security_policy values are provided and set them
 	if v, ok := d.GetOk("ingress_security_policy"); ok {
@@ -298,6 +305,15 @@ func resourceNetworkUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			networkCurrent.Spec.AllowSessionReuse = newAllowSessionReuse
 		} else {
 			networkCurrent.Spec.AllowSessionReuse = "inherit from vrf" // default value
+		}
+	}
+
+	if d.HasChange("ip_fragments_forwarding") {
+		if val, ok := d.GetOk("ip_fragments_forwarding"); ok {
+			newIpFragmentsForwarding := val.(string)
+			networkCurrent.Spec.IpFragmentsForwarding = newIpFragmentsForwarding
+		} else {
+			networkCurrent.Spec.IpFragmentsForwarding = "inherit from vrf" // default value
 		}
 	}
 
