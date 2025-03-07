@@ -542,3 +542,14 @@ func containsString(slice []string, str string) bool {
 	}
 	return false
 }
+
+func validateAddressFamily(val interface{}, key string) (warns []string, errs []error) {
+	v := val.(string)
+	switch v {
+	case "IPv4", "IPv6":
+		// valid
+	default:
+		errs = append(errs, fmt.Errorf("%q must be either 'IPv4' or 'IPv6', got: %s", key, v))
+	}
+	return
+}

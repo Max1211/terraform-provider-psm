@@ -50,6 +50,13 @@ func resourceRules() *schema.Resource {
 				Default:  "default",
 				ForceNew: true,
 			},
+			"address_family": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "IPv4",
+				ValidateFunc: validateAddressFamily,
+				Description:  "Address family for the security policy, must be either 'IPv4' or 'IPv6'",
+			},
 			"meta": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -101,6 +108,10 @@ func resourceRules() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"attach_tenant": {
 							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"address_family": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"rules": {
@@ -335,6 +346,7 @@ type Meta struct {
 
 type Spec struct {
 	AttachTenant              bool        `json:"attach-tenant"`
+	AddressFamily             string      `json:"address-family,omitempty"`
 	Rules                     []Rule      `json:"rules"`
 	Priority                  interface{} `json:"priority"`
 	PolicyDistributionTargets []string    `json:"policy-distribution-targets"`
@@ -396,6 +408,10 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	// Create the GO Struct that we will populate with data from the resource to send to the PSM server eventually as JSON. If there is something
 	// not being sent to the  server correctly the ensure this structure is correct.
+
+	addressFamily := d.Get("address_family").(string)
+	log.Printf("[DEBUG] Creating policy with address family: %s\n", addressFamily)
+
 	policy := &NetworkSecurityPolicy{
 		Kind:       nil,
 		APIVersion: nil,
@@ -412,6 +428,7 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 		},
 		Spec: Spec{
 			AttachTenant:              true,
+			AddressFamily:             addressFamily,
 			PolicyDistributionTargets: []string{d.Get("policy_distribution_target").(string)},
 			Rules:                     []Rule{},
 		},
@@ -507,6 +524,7 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	d.SetId(*responsePolicy.Meta.UUID)
 	d.Set("policy_name", responsePolicy.Meta.Name)
 	d.Set("tenant", responsePolicy.Meta.Tenant)
+	d.Set("address_family", responsePolicy.Spec.AddressFamily)
 
 	rules := make([]interface{}, len(responsePolicy.Spec.Rules))
 	for i, rule := range responsePolicy.Spec.Rules {
@@ -528,6 +546,7 @@ func resourceRulesCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	if err := d.Set("spec", []interface{}{map[string]interface{}{
 		"attach_tenant":               responsePolicy.Spec.AttachTenant,
+		"address_family":              responsePolicy.Spec.AddressFamily,
 		"rules":                       rules,
 		"priority":                    responsePolicy.Spec.Priority,
 		"policy_distribution_targets": responsePolicy.Spec.PolicyDistributionTargets,
@@ -589,6 +608,7 @@ func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{
 	d.SetId(*responsePolicy.Meta.UUID)
 	d.Set("policy_name", responsePolicy.Meta.Name)
 	d.Set("tenant", responsePolicy.Meta.Tenant)
+	d.Set("address_family", responsePolicy.Spec.AddressFamily)
 
 	rules := make([]map[string]interface{}, len(responsePolicy.Spec.Rules))
 	for i, rule := range responsePolicy.Spec.Rules {
@@ -623,13 +643,13 @@ func resourceRulesRead(ctx context.Context, d *schema.ResourceData, m interface{
 
 	if err := d.Set("spec", []interface{}{map[string]interface{}{
 		"attach_tenant":               responsePolicy.Spec.AttachTenant,
+		"address_family":              responsePolicy.Spec.AddressFamily,
 		"rules":                       rules,
 		"priority":                    responsePolicy.Spec.Priority,
 		"policy_distribution_targets": responsePolicy.Spec.PolicyDistributionTargets,
 	}}); err != nil {
 		return diag.FromErr(err)
 	}
-
 	if err := d.Set("meta", []interface{}{map[string]interface{}{
 		"name":             responsePolicy.Meta.Name,
 		"tenant":           responsePolicy.Meta.Tenant,
@@ -655,6 +675,10 @@ func resourceRulesUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	// Create the GO Struct that we will populate with data from the resource to send to the PSM server eventually as JSON. If there is something
 	// not being sent to the  server correctly the ensure this structure is correct.
+
+	addressFamily := d.Get("address_family").(string)
+	log.Printf("[DEBUG] Updating policy with address family: %s\n", addressFamily)
+
 	policy := &NetworkSecurityPolicy{
 		Kind:       nil,
 		APIVersion: nil,
@@ -671,6 +695,7 @@ func resourceRulesUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 		},
 		Spec: Spec{
 			AttachTenant:              true,
+			AddressFamily:             addressFamily,
 			PolicyDistributionTargets: []string{d.Get("policy_distribution_target").(string)},
 			Rules:                     []Rule{},
 		},
@@ -785,6 +810,7 @@ func resourceRulesUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	if err := d.Set("spec", []interface{}{map[string]interface{}{
 		"attach_tenant":               responsePolicy.Spec.AttachTenant,
+		"address_family":              responsePolicy.Spec.AddressFamily,
 		"rules":                       rules,
 		"priority":                    responsePolicy.Spec.Priority,
 		"policy_distribution_targets": responsePolicy.Spec.PolicyDistributionTargets,

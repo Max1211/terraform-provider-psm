@@ -4,7 +4,7 @@ HOSTNAME=local
 NAMESPACE=provider
 NAME=psm
 BINARY=terraform-provider-${NAME}
-VERSION=0.5.6
+VERSION=0.5.7
 OS_ARCH=linux_amd64
 OS=linux
 
