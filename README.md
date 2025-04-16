@@ -26,7 +26,6 @@ Once you install the provider it will be hosted locally with the current **Hostn
 
 Within your Terraform infrastructure file (ie main.tf) specify the provider with the following syntax. 
 
-
 ```
 terraform { 
   required_providers {
