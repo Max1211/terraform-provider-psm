@@ -8,6 +8,7 @@ archives:
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 
 builds:
+  - id: provider
     binary: '{{ .ProjectName }}_v{{ .Version }}_x5'
     env:
       - CGO_ENABLED=0
@@ -31,13 +32,10 @@ builds:
       - goarch: arm64
         goos: windows
     ldflags:
-      - -s -w -X 'github.com/hashicorp/terraform-provider-psm/version.ProviderVersion={{ .Version }}'
+      - -s -w -X main.version={{.Version}}
     mod_timestamp: '{{ .CommitTimestamp }}'
 
 checksum:
-  extra_files:
-    - glob: 'terraform-registry-manifest.json'
-      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
 
@@ -53,14 +51,9 @@ signs:
       - "${artifact}"
 
 release:
+  draft: true
   extra_files:
     - glob: 'terraform-registry-manifest.json'
-      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
-
-  draft: true
 
 snapshot:
   name_template: "{{ .Tag }}-next"
-
-extra_files:
-  - glob: 'terraform-registry-manifest.json'
