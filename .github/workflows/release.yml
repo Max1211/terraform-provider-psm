@@ -74,7 +74,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: ${{ github.event.repository.name }}_${{ github.ref_name }}_manifest.json
           asset_name: ${{ github.event.repository.name }}_${{ github.ref_name }}_manifest.json
           asset_content_type: application/json
