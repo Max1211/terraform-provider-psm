@@ -29,11 +29,23 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
 
+      # Create terraform-registry-manifest.json
+      - name: Prepare Terraform Registry manifest
+        run: |
+          cat > terraform-registry-manifest.json << EOF
+          {
+            "version": 1,
+            "metadata": {
+              "protocol_versions": ["5.0"]
+            }
+          }
+          EOF
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
           version: latest
-          args: release --clean --allow-dirty
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}

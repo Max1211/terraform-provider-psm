@@ -53,9 +53,10 @@ signs:
 
 release:
   draft: true
-  extra_files:
-    - glob: 'terraform-registry-manifest.json'
-      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+
+extra_files:
+  - glob: 'terraform-registry-manifest.json'
+    name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
 
 snapshot:
   version_template: "{{ .Tag }}-next"
