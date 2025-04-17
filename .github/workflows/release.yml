@@ -44,11 +44,27 @@ jobs:
         id: get_release
         run: |
           # Wait a moment for the release to be created
-          sleep 5
-          RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} | \
-            jq -r .id)
-          echo "RELEASE_ID=${RELEASE_ID}" >> $GITHUB_ENV
+          sleep 10
+          # Fetch the release ID more reliably
+          release_json=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }}")
+          
+          echo "Release JSON: $release_json" # For debugging
+          
+          RELEASE_ID=$(echo "$release_json" | jq -r '.id')
+          
+          if [ "$RELEASE_ID" = "null" ] || [ -z "$RELEASE_ID" ]; then
+            echo "Failed to get release ID. GitHub API response:"
+            echo "$release_json"
+            exit 1
+          fi
+          
+          echo "Found release ID: $RELEASE_ID"
+          echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
+          
+          # Get the upload URL for assets
+          UPLOAD_URL=$(echo "$release_json" | jq -r '.upload_url')
+          echo "UPLOAD_URL=$UPLOAD_URL" >> $GITHUB_ENV
 
       - name: Copy and rename manifest file
         run: cp terraform-registry-manifest.json ${{ github.event.repository.name }}_${{ github.ref_name }}_manifest.json
