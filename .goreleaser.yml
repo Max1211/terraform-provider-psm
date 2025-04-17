@@ -2,10 +2,10 @@ version: 2
 
 archives:
   - id: terraform-provider
-  - files:
+    files:
       - src: 'LICENSE'
         dst: 'LICENSE.txt'
-  - formats: [ 'zip' ]
+    formats: [ 'zip' ]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 
 builds:
