@@ -436,6 +436,23 @@ func createAddressCollection(data map[string]interface{}) AddressCollection {
 	}
 }
 
+func validateAddressOrCollection(rule map[string]interface{}, field string, ruleIndex int) error {
+	value, ok := rule[field].([]interface{})
+	if !ok || len(value) == 0 {
+		return fmt.Errorf("rule %d: %s is required", ruleIndex, field)
+	}
+
+	valueMap := value[0].(map[string]interface{})
+	addresses := valueMap["addresses"].([]interface{})
+	ipCollections := valueMap["ipcollections"].([]interface{})
+
+	if len(addresses) == 0 && len(ipCollections) == 0 {
+		return fmt.Errorf("rule %d: %s must have either addresses or ipcollections", ruleIndex, field)
+	}
+
+	return nil
+}
+
 func expandPermissions(permissions []interface{}) []struct {
 	ResourceGroup     string   `json:"resource-group"`
 	ResourceKind      string   `json:"resource-kind"`
