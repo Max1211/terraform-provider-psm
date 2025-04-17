@@ -4,13 +4,12 @@ on:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    environment: tf_provider_psm
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,13 +29,14 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
 
+      # Create terraform-registry-manifest.json
       - name: Prepare Terraform Registry manifest
         run: |
           cat > terraform-registry-manifest.json << EOF
           {
             "version": 1,
             "metadata": {
-              "protocol_versions": ["6.0"]
+              "protocol_versions": ["5.0"]
             }
           }
           EOF
@@ -52,6 +52,7 @@ jobs:
 
   release-notes:
     runs-on: ubuntu-latest
+    environment: tf_provider_psm
     steps:
       - uses: actions/checkout@v3
         with:
@@ -66,7 +67,7 @@ jobs:
             echo "Release version: ${{ github.ref_name }}" > release-notes.txt
             git log --pretty=format:"* %s (%h)" $(git describe --tags --abbrev=0 $(git rev-list --tags --skip=1 --max-count=1))..HEAD >> release-notes.txt
           fi
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: release-notes
           path: release-notes.txt
