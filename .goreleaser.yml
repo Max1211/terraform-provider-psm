@@ -56,4 +56,4 @@ release:
     - glob: 'terraform-registry-manifest.json'
 
 snapshot:
-  version_template: "{{ .Tag }}-next"
+  name_template: "{{ .Tag }}-next"
