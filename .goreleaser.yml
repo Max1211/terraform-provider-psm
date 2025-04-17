@@ -1,6 +1,7 @@
 version: 2
 
 archives:
+  - id: terraform-provider
   - files:
       - src: 'LICENSE'
         dst: 'LICENSE.txt'
@@ -56,4 +57,4 @@ release:
     - glob: 'terraform-registry-manifest.json'
 
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
