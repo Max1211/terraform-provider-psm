@@ -16,8 +16,8 @@ resource "psm_network" "example" {
   allow_session_reuse       = "enable"
   service_bypass            = true
   ip_fragments_forwarding   = "enable"
-  ingress_mirror_session = "traffic-monitoring"
-  egress_mirror_session  = "traffic-monitoring"
+  ingress_mirror_session    = "traffic-monitoring"
+  egress_mirror_session     = "traffic-monitoring"
 }
 ```
 
