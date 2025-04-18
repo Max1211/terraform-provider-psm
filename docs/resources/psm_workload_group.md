@@ -27,10 +27,10 @@ The following arguments are supported:
 * `name` - (Required) The name of the Workload Group. This must be unique within the tenant.
 
 * `workload_selector` - (Optional) A list of workload selectors. Each workload selector block supports the following:
-    * `workload_label_selector` - (Optional) A list of label selectors. Each label selector block supports:
-        * `workload_label_key` - (Required) The key of the workload label to match.
-        * `operator` - (Required) The operator to use for matching. Valid operators include "In", "NotIn", "Exists", "DoesNotExist", "Equals", and "NotEquals".
-        * `values` - (Required) A list of values to match against.
+  * `workload_label_selector` - (Optional) A list of label selectors. Each label selector block supports:
+    * `workload_label_key` - (Required) The key of the workload label to match.
+    * `operator` - (Required) The operator to use for matching. Valid operators include "In", "NotIn", "Exists", "DoesNotExist", "Equals", and "NotEquals".
+    * `values` - (Required) A list of values to match against.
 
 * `ip_collections` - (Optional) A list of IP collection names associated with this Workload Group.
 
@@ -44,6 +44,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Workload Groups can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_workload_group.example example-workload-group
+```text
+terraform import psm_workload_group.example example-workload-group
 ```

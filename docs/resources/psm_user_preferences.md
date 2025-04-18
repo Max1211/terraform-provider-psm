@@ -35,6 +35,6 @@ In addition to all arguments above, the following attributes are exported:
 
 User Preferences can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_user_preferences.example admin
+```text
+terraform import psm_user_preferences.example admin
 ```

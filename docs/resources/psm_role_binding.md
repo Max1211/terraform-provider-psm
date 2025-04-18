@@ -13,10 +13,10 @@ resource "psm_role_binding" "example" {
   users      = ["user1", "user2"]
 }
 ```
-<br />  
 
   ->
   The `user_groups` attribute is the link between the LDAP group distinguished name (DN) or radius group name.
+  
 ### Example Usage with LDAP authentication
 
 ```hcl
@@ -63,6 +63,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Role Bindings can be imported using the `tenant/name` format, e.g.,
 
-```
-$ terraform import psm_role_binding.example my-tenant/example-role-binding
+```text
+terraform import psm_role_binding.example my-tenant/example-role-binding
 ```

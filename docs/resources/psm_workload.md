@@ -41,6 +41,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Workloads can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_workload.example example-workload
+```text
+terraform import psm_workload.example example-workload
 ```

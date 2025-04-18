@@ -70,6 +70,6 @@ In addition to all arguments above, the following attributes are exported:
 
 VRF instances can be imported using the `name`, e.g.,
 
-```
+```text
 terraform import psm_vrf.example example-vrf
 ```

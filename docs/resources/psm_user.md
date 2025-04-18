@@ -49,6 +49,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Users can be imported using the `tenant/namespace/name` format, e.g.,
 
-```
-$ terraform import psm_user.example my-tenant/default/john.doe
+```text
+terraform import psm_user.example my-tenant/default/john.doe
 ```

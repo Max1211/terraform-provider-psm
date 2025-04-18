@@ -172,7 +172,7 @@ In addition to all arguments above, the following attributes are exported:
 
 Network Security Policies can be imported using the `id`, e.g.,
 
-```
+```text
 terraform import psm_rules.example &lt;policy-uuid&gt;
 ```
 

@@ -34,8 +34,8 @@ In addition to all arguments above, the following attributes are exported:
 
 The UI global settings can be imported using a placeholder ID, e.g.,
 
-```
-$ terraform import psm_ui_global_settings.example default-ui-global-settings
+```text
+terraform import psm_ui_global_settings.example default-ui-global-settings
 ```
 
 ## Notes
@@ -51,6 +51,7 @@ $ terraform import psm_ui_global_settings.example default-ui-global-settings
 ### Delete
 
 As mentioned in the notes, the delete operation resets the configuration to default values:
-- `duration`: "60m"
-- `warning_time`: "10s"
-- `enable_object_renaming`: true
+
+* `duration`: "60m"
+* `warning_time`: "10s"
+* `enable_object_renaming`: true
