@@ -1,120 +1,331 @@
-# Resource: psm_nat_policy
+# PSM NAT Policy Resource
 
-Manages Network Address Translation (NAT) policies in the PSM system.
+The `psm_nat_policy` resource allows you to configure Network Address Translation (NAT) policies in the PSM system.
 
-## Example Usage
+## Resource Configuration
 
 ```hcl
 resource "psm_nat_policy" "example" {
-  display_name = "Example NAT Policy"
+  display_name = "Example_NAT_Policy"
 
   rule {
-    name = "Rule 1"
-    type = "static"
-    source {
-      addresses = ["10.0.0.0/24"]
-    }
-    destination {
-      addresses = ["0.0.0.0/0"]
-    }
-    destination_proto_port {
-      protocol = "tcp"
-      ports    = "80,443"
-    }
-    translated_source {
-      addresses = ["192.168.1.100"]
-    }
+    # Rule configuration
   }
 
-  rule {
-    name = "Rule 2"
-    type = "dynamic"
-    source {
-      ipcollections = ["internal_network"]
-    }
-    destination {
-      addresses = ["0.0.0.0/0"]
-    }
-    destination_proto_port {
-      protocol = "any"
-      ports    = "any"
-    }
-    translated_source {
-      addresses = ["203.0.113.1-203.0.113.100"]
-    }
-  }
-
-  policy_distribution_targets = ["DSC1", "DSC2"]
+  policy_distribution_targets = ["PDT01"]
 }
 ```
 
 ## Argument Reference
 
-The following arguments are supported:
-
 * `display_name` - (Required) The display name of the NAT policy.
+* `rule` - (Required) One or more rule blocks defining the NAT rules. See [Rule Configuration](#rule-configuration) below.
+* `policy_distribution_targets` - (Optional) List of policy distribution targets. Default to "default"
 
-* `rule` - (Required) One or more rule blocks defining the NAT rules. Each rule block supports:
-  * `name` - (Required) The name of the rule.
-  * `disable` - (Optional) Whether the rule is disabled. Defaults to `false`.
-  * `type` - (Optional) The type of NAT rule. Defaults to "static".
-  * `source` - (Required) A source block defining the source of the traffic.
-    * `addresses` - (Optional) A list of source IP addresses or subnets.
-    * `ipcollections` - (Optional) A list of IP collections to use as sources.
-  * `destination` - (Required) A destination block defining the destination of the traffic.
-    * `addresses` - (Optional) A list of destination IP addresses or subnets.
-    * `ipcollections` - (Optional) A list of IP collections to use as destinations.
-  * `destination_proto_port` - (Required) A block defining the destination protocol and port.
-    * `protocol` - (Required) The protocol (e.g., "tcp", "udp", "any").
-    * `ports` - (Required) The port or port range (e.g., "80", "1024-2048", "any").
-  * `translated_source` - (Optional) A block defining the translated source.
-    * `addresses` - (Optional) A list of translated source IP addresses.
-    * `ipcollections` - (Optional) A list of IP collections to use as translated sources.
-  * `translated_destination` - (Optional) A block defining the translated destination.
-    * `addresses` - (Optional) A list of translated destination IP addresses.
-    * `ipcollections` - (Optional) A list of IP collections to use as translated destinations.
-  * `translated_destination_port` - (Optional) The translated destination port.
+### Rule Configuration
 
-* `policy_distribution_targets` - (Required) A list of distribution targets for the policy.
+Each `rule` block supports the following arguments:
 
-## Attribute Reference
+* `name` - (Required) Name of the rule.
+* `disable` - (Optional) Whether the rule is disabled. Defaults to `false`.  
+  
+-> Omitting `source`, `destination`, `translated_source` and / or `translated_destination` defaults to an empty value which is translated to "any".  
+For the sake of completeness using the value "any" is supported, having the same effect.
+* `source` - (Optional) Source address configuration. See [Address Configuration](#address-configuration) below.
+* `destination` - (Optional) Destination address configuration. See [Address Configuration](#address-configuration) below.
+* `destination_proto_port` - (Optional) Protocol and port configuration. See [Protocol and Port Configuration](#protocol-and-port-configuration) below.
+* `translated_source` - (Optional) Translated source address configuration. See [Address Configuration](#address-configuration) below.
+* `translated_destination` - (Optional) Translated destination address configuration. See [Address Configuration](#address-configuration) below.
+* `translated_destination_port` - (Optional) Translated destination port.  
 
-In addition to all arguments above, the following attributes are exported:
+-> Setting `translated_destination_port` will rewrite the destination port. Only single port rewrite is supported for single port match.
 
-* `id` - The ID of the NAT policy.
+### Address Configuration
 
-## Import
+The `source`, `destination`, `translated_source`, and `translated_destination` blocks support:
 
-NAT policies can be imported using the policy ID, e.g.,
+* `addresses` - (Optional) List of IP addresses or CIDR ranges.
+* `ipcollections` - (Optional) List of IP collection IDs.
+
+### Protocol and Port Configuration
+
+The `destination_proto_port` block supports:
+
+* `protocol` - (Required) The protocol (only protocols tcp, udp, icmp, gre, esp, ah, any and protocol numbers from 0 to 254 are allowed).
+* `ports` - (Optional) Port or port range (e.g., "80", "1024-2048").  
+
+-> Single port or a single port range is supported.
+
+## Usage Examples
+
+### Source NAT (SNAT)
+
+```hcl
+resource "psm_nat_policy" "snat_example" {
+  display_name = "SNAT_Example"
+
+  rule {
+    name = "Outbound_SNAT"
+    source {
+      addresses = ["192.168.1.0/24"]
+    }
+    translated_source {
+      addresses = ["203.0.113.0/24"]
+    }
+  }
+
+  policy_distribution_targets = ["PDT01"]
+}
+```
+
+### Destination NAT (DNAT)
+
+```hcl
+resource "psm_nat_policy" "dnat_example" {
+  display_name = "DNAT_Example"
+
+  rule {
+    name = "Inbound_DNAT"
+    destination {
+      addresses = ["203.0.113.100"]
+    }
+    destination_proto_port {
+      protocol = "tcp"
+      ports    = "80"
+    }
+    translated_destination {
+      addresses = ["192.168.1.10"]
+    }
+    translated_destination_port = "8080"
+  }
+
+  policy_distribution_targets = ["PDT01"]
+}
+```
+
+### Combined SNAT and DNAT
+
+```hcl
+resource "psm_nat_policy" "snat_dnat_example" {
+  display_name = "SNAT_DNAT_Example"
+
+  rule {
+    name = "Combined_NAT"
+    source {
+      addresses = ["192.168.1.0/24"]
+    }
+    destination {
+      addresses = ["10.100.2.10"]
+    }
+    destination_proto_port {
+      protocol = "tcp"
+      ports    = "80"
+    }
+    translated_source {
+      addresses = ["10.0.0.0/24"]
+    }
+    translated_destination {
+      addresses = ["192.168.2.10"]
+    }
+    translated_destination_port = "8080"
+  }
+
+  policy_distribution_targets = ["PDT01"]
+}
+```
+
+### Using IP Collections
+
+```hcl
+resource "psm_nat_policy" "ipcollection_example" {
+  display_name = "IP_Collection_NAT_Example"
+
+  rule {
+    name = "NAT_With_IPCollections"
+    source {
+      ipcollections = [psm_ipcollection.internal.id]
+    }
+    destination {
+      ipcollections = [psm_ipcollection.external.id]
+    }
+    translated_source {
+      addresses = ["203.0.113.0/24"]
+    }
+  }
+
+  policy_distribution_targets = ["PDT01"]
+}
+```
+
+### Multiple SNAT Rules in a Policy
+
+```hcl
+resource "psm_nat_policy" "multi_rule_snat_example" {
+  display_name = "Multi_Rule_SNAT_Example"
+
+  rule {
+    name = "SNAT_Internal_Network"
+    source {
+      addresses = ["192.168.1.0/24"]
+    }
+    translated_source {
+      addresses = ["203.0.113.0/24"]
+    }
+  }
+
+  rule {
+    name = "SNAT_DMZ_Servers_HTTP"
+    source {
+      addresses = ["172.16.1.0/24"]
+    }
+    destination_proto_port {
+      protocol = "tcp"
+      ports    = "80"
+    }
+    translated_source {
+      addresses = ["203.0.114.0/24"]
+    }
+  }
+
+  rule {
+    name = "SNAT_DMZ_Servers_HTTPS"
+    source {
+      addresses = ["172.16.1.0/24"]
+    }
+    destination_proto_port {
+      protocol = "tcp"
+      ports    = "443"
+    }
+    translated_source {
+      addresses = ["203.0.114.0/24"]
+    }
+  }
+
+  rule {
+    name = "SNAT_Development_Network"
+    source {
+      ipcollections = [psm_ipcollection.int1.id]
+    }
+    translated_source {
+      addresses = ["203.0.115.0/24"]
+    }
+  }
+
+  policy_distribution_targets = ["PDT01"]
+}
+```
+
+### Multiple DNAT Rules in a Policy
+
+```hcl
+resource "psm_nat_policy" "multi_rule_dnat_example" {
+  display_name = "Multi_Rule_DNAT_Example"
+
+  rule {
+    name = "DNAT_Web_Server_HTTP"
+    destination {
+      addresses = ["203.0.113.100"]
+    }
+    destination_proto_port {
+      protocol = "tcp"
+      ports    = "80"
+    }
+    translated_destination {
+      addresses = ["192.168.1.10"]
+    }
+  }
+
+  rule {
+    name = "DNAT_Web_Server_HTTPS"
+    destination {
+      addresses = ["203.0.113.100"]
+    }
+    destination_proto_port {
+      protocol = "tcp"
+      ports    = "443"
+    }
+    translated_destination {
+      addresses = ["192.168.1.10"]
+    }
+  }
+
+  rule {
+    name = "DNAT_FTP_Server_Control"
+    destination {
+      addresses = ["203.0.113.101"]
+    }
+    destination_proto_port {
+      protocol = "tcp"
+      ports    = "21"
+    }
+    translated_destination {
+      addresses = ["192.168.1.20"]
+    }
+  }
+
+  rule {
+    name = "DNAT_FTP_Server_Passive"
+    destination {
+      addresses = ["203.0.113.101"]
+    }
+    destination_proto_port {
+      protocol = "tcp"
+      ports    = "50000-51000"
+    }
+    translated_destination {
+      addresses = ["192.168.1.20"]
+    }
+  }
+
+  rule {
+    name = "DNAT_VPN_Gateway_IKE"
+    destination {
+      addresses = ["203.0.113.102"]
+    }
+    destination_proto_port {
+      protocol = "udp"
+      ports    = "500"
+    }
+    translated_destination {
+      addresses = ["192.168.1.30"]
+    }
+  }
+
+  rule {
+    name = "DNAT_VPN_Gateway_IKE_NAT"
+    destination {
+      addresses = ["203.0.113.102"]
+    }
+    destination_proto_port {
+      protocol = "udp"
+      ports    = "4500"
+    }
+    translated_destination {
+      addresses = ["192.168.1.30"]
+    }
+  }
+
+  rule {
+    name = "DNAT_VPN_Gateway_IPSEC"
+    destination {
+      addresses = ["203.0.113.102"]
+    }
+    destination_proto_port {
+      protocol = "esp"
+    }
+    translated_destination {
+      addresses = ["192.168.1.30"]
+    }
+  }
+
+  policy_distribution_targets = ["PDT01"]
+}
+```
+
+### Importing Existing NAT Policies
+
+To import an existing NAT policy into Terraform, use the following command:
 
 ```
-$ terraform import psm_nat_policy.example 12345
+terraform import psm_nat_policy.example <policy_id>
 ```
-
-## Notes
-
-1. The `source` and `destination` blocks in each rule must have either `addresses` or `ipcollections` defined. If both are empty, the rule will apply to any source/destination.
-
-2. The `translated_source` and `translated_destination` blocks are optional. If not provided, no translation will be performed for that direction.
-
-3. The `type` field in each rule can be "static" or "dynamic". "static" is used for one-to-one NAT, while "dynamic" is used for many-to-one NAT.
-
-4. The `policy_distribution_targets` define where this NAT policy will be applied. These are typically the names or IDs of network devices where the policy should be distributed.
-
-5. When updating a NAT policy, be cautious as changes may impact existing network traffic flows.
-
-## Best Practices
-
-1. Use meaningful names for your NAT policies and rules to easily identify their purpose.
-
-2. Order your rules carefully. Rules are processed in the order they appear in the configuration.
-
-3. Use IP collections where possible to make your policies more manageable and easier to update.
-
-4. Regularly review and audit your NAT policies to ensure they align with your current network architecture and security requirements.
-
-5. Be cautious when using "any" for protocols or ports, as this may create overly permissive rules.
-
-6. Consider using variables for IP addresses and ports to make your Terraform configurations more flexible and reusable across different environments.
-
-7. Always test NAT policy changes in a non-production environment before applying them to production systems.

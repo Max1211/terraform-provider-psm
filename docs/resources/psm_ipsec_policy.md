@@ -2,34 +2,93 @@
 
 Manages IPSec policies in the PSM system. These policies define the configuration for IPSec tunnels.
 
-## Example Usage
+## Example Usage single tunnel with PSK based authentication
 
 ```hcl
 resource "psm_ipsec_policy" "example" {
   display_name = "Example IPSec Policy"
 
   tunnel {
-    policy_distribution_targets = ["DSC1", "DSC2"]
-    ha_mode                     = "active_standby"
+    policy_distribution_targets = ["example-pdt"]
+    ha_mode                     = "no_ha"
     disable_tcp_mss_adjust      = false
 
     tunnel_endpoints {
-      interface_name = "eth0"
-      dse             = "DSE1"
-      ike_version     = "v2"
+      interface_name = "tunnel100"
+      dse             = "1234.1234.1234"
+      ike_version    = "ikev2"
 
       ike_sa {
-        encryption_algorithms = ["aes256"]
-        hash_algorithms       = ["sha256"]
-        dh_groups             = ["modp2048"]
+        encryption_algorithms = ["aes_gcm_128", "aes_gcm_256"]
+        hash_algorithms       = ["sha_512", "sha_384", "sha_256"]
+        dh_groups             = ["group20", "group19"]
         rekey_lifetime        = "8h"
-        pre_shared_key        = "your-preshared-key"
+        pre_shared_key        = "ExampleSecretPreSharedKeys"
+        reauth_lifetime       = "24h"
+        dpd_delay             = "60s"
+        ikev1_dpd_timeout     = "180s"
+        ike_initiator         = true
         auth_type             = "psk"
       }
 
       ipsec_sa {
-        encryption_algorithms = ["aes256"]
-        dh_groups             = ["modp2048"]
+        encryption_algorithms = ["aes_gcm_128", "aes_gcm_256"]
+        dh_groups             = ["group19", "group20"]
+        rekey_lifetime        = "1h"
+      }
+
+      local_identifier {
+        type  = "ip"
+        value = "1.2.3.4"
+      }
+
+      remote_identifier {
+        type  = "ip"
+        value = "5.6.7.8"
+      }
+    }
+
+    lifetime {
+      sa_lifetime  = "1h"
+      ike_lifetime = "8h"
+    }
+  }
+}
+```
+
+## Example Usage active_active tunnel with certificate based authentication
+
+```hcl
+resource "psm_ipsec_policy" "example" {
+  display_name = "Example IPSec Policy"
+
+  tunnel {
+    ha_mode                     = "active_active"
+    policy_distribution_targets = ["example-pdt"]
+    disable_tcp_mss_adjust      = false
+
+    tunnel_endpoints {
+      interface_name = "tunnel100"
+      dse            = "1234.1234.1234"
+      ike_version    = "ikev2"
+
+      ike_sa {
+        encryption_algorithms       = ["aes_gcm_128", "aes_gcm_256"]
+        hash_algorithms             = ["sha_512", "sha_384", "sha_256"]
+        dh_groups                   = ["group20", "group19"]
+        rekey_lifetime              = "8h"
+        reauth_lifetime             = "24h"
+        dpd_delay                   = "60s"
+        ikev1_dpd_timeout           = "180s"
+        ike_initiator               = true
+        auth_type                   = "certificates"
+        local_identity_certificates = file("./example_certificate.pem")
+        remote_ca_certificates      = [file("./example_ca_certificate.pem")]
+      }
+
+      ipsec_sa {
+        encryption_algorithms = ["aes_gcm_128", "aes_gcm_256"]
+        dh_groups             = ["group19", "group20"]
         rekey_lifetime        = "1h"
       }
 
@@ -42,11 +101,52 @@ resource "psm_ipsec_policy" "example" {
         type  = "fqdn"
         value = "remote.example.com"
       }
+
+      lifetime {
+        sa_lifetime  = "1h"
+        ike_lifetime = "8h"
+      }
     }
 
-    lifetime {
-      sa_lifetime  = "8h"
-      ike_lifetime = "24h"
+    tunnel_endpoints {
+      interface_name = "tunnel101"
+      dse            = "4321.4321.4321"
+      ike_version    = "ikev2"
+
+      ike_sa {
+        encryption_algorithms       = ["aes_gcm_128", "aes_gcm_256"]
+        hash_algorithms             = ["sha_512", "sha_384", "sha_256"]
+        dh_groups                   = ["group20", "group19"]
+        rekey_lifetime              = "8h"
+        reauth_lifetime             = "24h"
+        dpd_delay                   = "60s"
+        ikev1_dpd_timeout           = "180s"
+        ike_initiator               = true
+        auth_type                   = "certificates"
+        local_identity_certificates = file("./example_certificate.pem")
+        remote_ca_certificates      = [file("./example_ca_certificate.pem")]
+      }
+
+      ipsec_sa {
+        encryption_algorithms = ["aes_gcm_128", "aes_gcm_256"]
+        dh_groups             = ["group19", "group20"]
+        rekey_lifetime        = "1h"
+      }
+
+      local_identifier {
+        type  = "fqdn"
+        value = "local.example.com"
+      }
+
+      remote_identifier {
+        type  = "fqdn"
+        value = "remote.example.com"
+      }
+
+      lifetime {
+        sa_lifetime  = "1h"
+        ike_lifetime = "8h"
+      }
     }
   }
 }
@@ -60,50 +160,73 @@ The following arguments are supported:
 
 * `tunnel` - (Required) A block that defines the tunnel configuration. It supports the following:
   * `policy_distribution_targets` - (Required) List of distribution targets for the policy.
-  * `ha_mode` - (Optional) High availability mode. Default is "no_ha".
+  * `ha_mode` - (Optional) High availability mode. Default is "no_ha".  
+    Possible values: `no_ha`, `active_standby`, `active_active`.
   * `disable_tcp_mss_adjust` - (Optional) Whether to disable TCP MSS adjustment. Default is false.
   * `tunnel_endpoints` - (Required) A list of tunnel endpoint configurations. Each endpoint supports:
-    * `interface_name` - (Required) The name of the interface.
-    * `dse` - (Required) The DSE (Distributed Services Engine) for this endpoint.
-    * `ike_version` - (Required) The IKE version to use.
-    * `ike_sa` - (Required) IKE Security Association configuration.
+    * `interface_name` - (Required) The name of the tunnel interface. Must correspond to the name in CXOS.
+    * `dse` - (Required) The DSE (Distributed Services Engine, CX 10000 DSS-ID) for this endpoint.
+    * `ike_version` - (Required) The IKE version to use. Default is "`ikev2`.  
+      Possible values: `prefer_ikev2_support_ikev1`, `ikev1`, `ikev2`.
+    * `ike_sa` - (Required) IKE Security Association configuration. 
     * `ipsec_sa` - (Required) IPSec Security Association configuration.
     * `local_identifier` - (Required) Local identifier configuration.
     * `remote_identifier` - (Required) Remote identifier configuration.
-  * `lifetime` - (Optional) Lifetime configuration for the tunnel.
+    * `lifetime` - (Optional) Lifetime configuration for this specific tunnel endpoint.
 
 ## Nested Blocks
 
 ### `ike_sa`
 
-* `encryption_algorithms` - (Required) List of encryption algorithms.
-* `hash_algorithms` - (Required) List of hash algorithms.
-* `dh_groups` - (Required) List of Diffie-Hellman groups.
-* `rekey_lifetime` - (Optional) Rekey lifetime. Default is "8h".
-* `pre_shared_key` - (Optional) Pre-shared key for authentication.
-* `reauth_lifetime` - (Optional) Reauthentication lifetime. Default is "24h".
-* `dpd_delay` - (Optional) Dead Peer Detection delay. Default is "60s".
-* `ikev1_dpd_timeout` - (Optional) IKEv1 Dead Peer Detection timeout. Default is "180s".
-* `ike_initiator` - (Optional) Whether this side is the IKE initiator. Default is true.
-* `auth_type` - (Optional) Authentication type. Default is "psk".
-* `local_identity_certificates` - (Optional) Local identity certificates.
-* `remote_ca_certificates` - (Optional) List of remote CA certificates.
+* `encryption_algorithms` - (Required) List of encryption algorithms. Default is "`aes_128`.  
+  Possible values:  `aes_128`, `aes_256`, `triple_des`, `cast_128`, `aes_gcm_128`, `aes_gcm_256`.
+* `hash_algorithms` - (Required) List of hash algorithms. Default is `sha_256`.  
+Possible values: `sha_256`, `sha_512`, `sha_384`. 
+* `dh_groups` - (Required) List of Diffie-Hellman groups. Default is `group1`.  
+Possible values: `group1`, `group2`, `group5`, `group14`, `group15`, `group19`, `group20`.
+* `rekey_lifetime` - (Required) Rekey lifetime. Default is "8h".  
+Possible values such as: "24h", 2h45m. Valid time units are "s", "m", "h".  
+Should be a valid time duration between 15m0s and 24h0m0s.
+* `reauth_lifetime` - (Required) Reauthentication lifetime. Default is "24h".  
+Possible values such as: "24h", 2h45m. Valid time units are "s", "m", "h".  
+Should be a valid time duration between 1h0m0s and 24h0m0s.
+* `dpd_delay` - (Required) Dead Peer Detection delay. Default is "60s".  
+Possible values such as: "24h", 2h45m. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". 
+Should be a valid time duration between 1m0s and 1h0m0s.
+* `ikev1_dpd_timeout` - (Required) IKEv1 Dead Peer Detection timeout. Default is "180s".  
+Possible values such as: "180s" or "2h45m". Valid time units are "s", "m", "h"
+Should be a valid time duration between 1m0s and 1h0m0s.
+* `ike_initiator` - (Required) Whether this side is the IKE initiator. Default is "false".
+* `auth_type` - (Required) Authentication type. Can be "psk" or "certificates". Default is `psk`.  
+Possible values: `psk`, `certificates`.
+* `pre_shared_key` - (Optional) Pre-shared key for authentication (at least 20 chars). Required if `auth_type` is "psk".
+* `local_identity_certificates` - (Optional) Local identity certificates. Required if `auth_type` is "certificates".
+* `remote_ca_certificates` - (Optional) List of remote CA certificates. Required if `auth_type` is "certificates".
 
 ### `ipsec_sa`
 
-* `encryption_algorithms` - (Required) List of encryption algorithms.
-* `dh_groups` - (Required) List of Diffie-Hellman groups.
-* `rekey_lifetime` - (Optional) Rekey lifetime. Default is "1h".
+* `encryption_algorithms` - (Required) List of encryption algorithms. Default is `aes_gcm_256`.  
+Possible values: `aes_gcm_128`, `aes_gcm_256`.
+* `dh_groups` - (Required) List of Diffie-Hellman groups. Default is `group1`.  
+Possible values: `group1`, `group2`, `group5`, `group14`, `group15`, `group19`, `group20`.
+* `rekey_lifetime` - (Required) Rekey lifetime. Default is "1h".  
+Possible values such as: "1h", 2h45m. Valid time units are "s", "m", "h".  
+Should be a valid time duration between 15m0s and 24h0m0s.
 
 ### `local_identifier` and `remote_identifier`
 
-* `type` - (Required) The type of identifier.
+* `type` - (Required) The type of identifier. Can be "ip" or "fqdn". Default is "ip".  
+Possible values: `keyid`, `ip`, `fqdn`, `email`.
 * `value` - (Required) The value of the identifier.
 
 ### `lifetime`
 
-* `sa_lifetime` - (Optional) Security Association lifetime.
-* `ike_lifetime` - (Optional) IKE lifetime.
+* `sa_lifetime` - (Required) Security Association lifetime. Default is "8h".   
+Possible values such as: "1h" or "2h45m". Valid time units are "s", "m", "h"
+Should be a valid time duration between 1h0m0s and 24h0m0s.
+* `ike_lifetime` - (Required) IKE lifetime. Default is "24h".  
+Possible values such as: "1h" or "2h45m". Valid time units are "s", "m", "h"
+Should be a valid time duration between 1h0m0s and 24h0m0s.
 
 ## Attribute Reference
 
@@ -115,34 +238,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-IPSec policies can be imported using the policy ID, e.g.,
+IPSec policies can be imported using the `id`, e.g.,
 
 ```
-$ terraform import psm_ipsec_policy.example 12345
+$ terraform import psm_ipsec_policy.example 12345678-1234-1234-1234-123456789012
 ```
-
-## Notes
-
-1. The `pre_shared_key` in the `ike_sa` block is sensitive and will not be displayed in logs or console output.
-
-2. When updating an IPSec policy, be cautious as changes may impact existing VPN connections.
-
-3. The `policy_distribution_targets` define where this IPSec policy will be applied. These are typically the names or IDs of network devices where the policy should be distributed.
-
-4. The `ha_mode` can be set to "no_ha", "active_standby", or other values supported by your PSM system.
-
-## Best Practices
-
-1. Use meaningful names for your IPSec policies to easily identify their purpose.
-
-2. Regularly review and update your IPSec policies to ensure they align with your current security requirements.
-
-3. Use variables for sensitive information like pre-shared keys to keep them out of your main configuration.
-
-4. Consider using stronger encryption algorithms and longer key lengths for better security.
-
-5. Implement proper access controls and review processes before applying changes to IPSec policies, as these changes can have significant impacts on network connectivity.
-
-6. Regularly rotate pre-shared keys and certificates used in IPSec configurations.
-
-7. Monitor the lifetimes set for SA and IKE to ensure they meet your security and performance requirements.

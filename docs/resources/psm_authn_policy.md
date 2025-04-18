@@ -1,17 +1,17 @@
-# Resource: psm_authn_policy
+# Resource: psm_authpolicy
 
 Manages the authentication policy in the PSM system.
 
 ## Example Usage
 
 ```hcl
-resource "psm_authn_policy" "example" {
-  token_expiry = "24h"
+resource "psm_authpolicy" "example" {
+  token_expiry = "144h"
   authenticator_order = ["local", "ldap", "radius"]
 
   local {
     password_length = 12
-    allowed_failed_login_attempts = 5
+    allowed_failed_login_attempts = 10
     failed_login_attempts_duration = "30m"
   }
 
@@ -31,10 +31,12 @@ resource "psm_authn_policy" "example" {
     }
 
     servers {
-      url = "ldap://ldap.example.com:389"
+      url = "ldap.example.com:389"
       tls_options {
         start_tls = true
+        server_name                   = "server.example.com"
         skip_server_cert_verification = false
+        trusted_certs                 = file("./server_crt.pem")
       }
     }
 
@@ -45,7 +47,7 @@ resource "psm_authn_policy" "example" {
   radius {
     nas_id = "psm-server"
     servers {
-      url = "radius://radius.example.com:1812"
+      url = "radius.example.com:1812"
       secret = "radiussecret"
       auth_method = "pap"
     }
@@ -58,7 +60,9 @@ resource "psm_authn_policy" "example" {
 
 The following arguments are supported:
 
-* `token_expiry` - (Optional) The expiration time for authentication tokens.
+* `token_expiry` - (Optional) The expiration time for authentication tokens. Default is "144h".  
+
+-> When LDAP or RADIUS resources are defined, they must be defined in the `authentication_order`.
 * `authenticator_order` - (Optional) The order in which authentication methods are tried. Valid values are "local", "ldap", and "radius".
 
 * `local` - (Optional) Configuration for local authentication.
@@ -84,7 +88,9 @@ The following arguments are supported:
       * `start_tls` - (Optional) Whether to use StartTLS.
       * `skip_server_cert_verification` - (Optional) Whether to skip server certificate verification.
       * `server_name` - (Optional) The expected server name for certificate verification.
-      * `trusted_certs` - (Optional) Trusted certificates for LDAP server verification.
+      * `trusted_certs` - (Optional) Trusted certificates for LDAP server verification.  
+
+-> `skip_server_cert_verification` "false" requires the use of `start_tls`.
   * `tag` - (Optional) A tag for the LDAP configuration.
   * `skip_nested_groups` - (Optional) Whether to skip nested group resolution.
 
@@ -108,14 +114,5 @@ In addition to all arguments above, the following attributes are exported:
 The authentication policy can be imported using a placeholder ID:
 
 ```
-$ terraform import psm_authn_policy.example authn-policy
+$ terraform import psm_authpolicy.example authn-policy
 ```
-
-This will import the existing authentication policy into your Terraform state.
-
-## Notes
-
-* The authentication policy is a singleton resource. Only one instance of this resource should be defined in your Terraform configuration.
-* When updating the authentication policy, be careful not to lock yourself out of the system. Always ensure that at least one authentication method remains functional.
-* Sensitive fields like `bind_password` and `secret` are write-only. Their values will not be returned in read operations.
-* The `local` authentication method is always available and cannot be completely removed from the policy.

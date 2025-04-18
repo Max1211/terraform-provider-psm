@@ -2,38 +2,134 @@
 
 ## Resource: psm_rules
 
-The `psm_rules` resource allows you to manage Network Security Policies in PSM (Pensando Service Mesh).
+The `psm_rules` resource allows you to manage Network Security Policies in the PSM system.
 
-### Example Usage
+### Example Usage IPv4
 
 ```hcl
 resource "psm_rules" "example" {
-  policy_name                 = "example-policy"
-  tenant                      = "default"
-  policy_distribution_target  = "default"
+  policy_name           = "example-policy"
 
   rule {
     rule_name           = "allow-http"
     action              = "permit"
     description         = "Allow HTTP traffic"
-    apps                = ["http"]
-    from_ip_addresses   = ["10.0.0.0/24"]
+    from_ip_addresses   = ["10.0.0.0/24", "10.0.10.0/24"]
     to_ip_addresses     = ["192.168.1.0/24"]
     proto_ports {
       protocol = "tcp"
       ports    = "80"
     }
+    labels = {
+      "Application" : "HTTP"
+      "Ticket-ID" : "INC0017399"
+    }
   }
 
   rule {
-    rule_name           = "deny-telnet"
+    rule_name             = "allow-ssh"
+    action                = "permit"
+    description           = "Allow SSH traffic"
+    apps                  = ["SSH"]
+    from_ip_collections   = ["Network_10.0.0.0_24"]
+    to_ip_collections     = ["Network_192.168.1.0/24"]
+    labels = {
+      "Application" : "SSH"
+      "Ticket-ID" : "INC0017400"
+    }
+  }
+
+  rule {
+    rule_name             = "allow-ntp"
+    action                = "permit"
+    description           = "Allow NTP traffic"
+    apps                  = ["NTP"]
+    from_ip_collections   = ["Network_10.0.0.0_24"]
+    to_workloadgroups     = ["WLG-NTP-Server"]
+    labels = {
+      "Application" : "NTP"
+      "Ticket-ID" : "INC0017401"
+    }
+  }
+
+  rule {
+    rule_name           = "deny-any"
     action              = "deny"
-    description         = "Block Telnet traffic"
-    from_workloadgroups = ["frontend"]
-    to_workloadgroups   = ["backend"]
+    description         = "Deny any traffic"
+    from_ip_addresses   = ["any"]
+    to_ip_addresses     = ["any"]
+    proto_ports {
+      protocol = "any"
+    }
+    labels = {
+      "Application" : "ANY"
+      "Ticket-ID" : "INC0017402"
+    }
+  }
+}
+```
+
+### Example Usage IPv6
+
+```hcl
+resource "psm_rules" "example_ipv6" {
+  policy_name           = "example-policy_ipv6"
+  address_family        = "IPv6"
+
+  rule {
+    rule_name           = "allow-http"
+    action              = "permit"
+    description         = "Allow HTTP traffic"
+    from_ip_addresses   = ["::/0"]
+    to_ip_addresses     = ["::/0"]
     proto_ports {
       protocol = "tcp"
-      ports    = "23"
+      ports    = "80"
+    }
+    labels = {
+      "Application" : "HTTP"
+      "Ticket-ID" : "INC0017399"
+    }
+  }
+
+  rule {
+    rule_name             = "allow-ssh"
+    action                = "permit"
+    description           = "Allow SSH traffic"
+    apps                  = ["SSH"]
+    from_ip_collections = ["Network_2001:db8:1::/48"]
+    to_ip_collections   = ["Network_2001:db8:2::/48"]
+    labels = {
+      "Application" : "SSH"
+      "Ticket-ID" : "INC0017400"
+    }
+  }
+
+  rule {
+    rule_name             = "allow-ntp"
+    action                = "permit"
+    description           = "Allow NTP traffic"
+    apps                  = ["NTP"]
+    from_ip_collections   = ["Network_2001:db8:3::/48"]
+    to_workloadgroups     = ["WLG-NTP-Server"]
+    labels = {
+      "Application" : "NTP"
+      "Ticket-ID" : "INC0017401"
+    }
+  }
+
+  rule {
+    rule_name           = "deny-any"
+    action              = "deny"
+    description         = "Deny any traffic"
+    from_ip_addresses   = ["any"]
+    to_ip_addresses     = ["any"]
+    proto_ports {
+      protocol = "any"
+    }
+    labels = {
+      "Application" : "ANY"
+      "Ticket-ID" : "INC0017402"
     }
   }
 }
@@ -46,7 +142,9 @@ The following arguments are supported:
 * `policy_name` - (Required) The name of the Network Security Policy.
 * `tenant` - (Optional) The tenant for the policy. Defaults to "default".
 * `policy_distribution_target` - (Optional) The distribution target for the policy. Defaults to "default".
-* `rule` - (Optional) A list of rules for the policy. Each rule block supports the following:
+* `tenant` - (Optional) The tenant for the policy. Defaults to "default".
+* `address_family` - (Optional) The address family of the security policy. Defaults to "IPv4".
+  Possible values: `IPv4`, `IPv6`.
     * `rule_name` - (Optional) The name of the rule.
     * `action` - (Required) The action to take. Must be either "permit" or "deny".
     * `description` - (Optional) A description of the rule.
@@ -69,20 +167,6 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The UUID of the Network Security Policy.
-* `meta` - A block containing metadata about the policy, including:
-    * `name` - The name of the policy.
-    * `tenant` - The tenant of the policy.
-    * `namespace` - The namespace of the policy.
-    * `generation_id` - The generation ID of the policy.
-    * `resource_version` - The resource version of the policy.
-    * `uuid` - The UUID of the policy.
-    * `labels` - Any labels associated with the policy.
-    * `self_link` - The self-link of the policy.
-* `spec` - A block containing the specification of the policy, including:
-    * `attach_tenant` - Whether the policy is attached to a tenant.
-    * `rules` - The list of rules in the policy.
-    * `priority` - The priority of the policy.
-    * `policy_distribution_targets` - The distribution targets for the policy.
 
 ### Import
 

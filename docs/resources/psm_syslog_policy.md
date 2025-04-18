@@ -1,19 +1,19 @@
 # Terraform Provider Documentation
 
-## Resource: psm_syslog_policy
+## Resource: psm_syslog_export_policy
 
-The `psm_syslog_policy` resource allows you to manage Syslog Policies in PSM (Pensando Service Mesh).
+The `psm_syslog_export_policy` resource allows you to manage Syslog Policies in PSM.
 
 ### Example Usage
 
 ```hcl
-resource "psm_syslog_policy" "example" {
+resource "psm_syslog_export_policy" "example" {
   name   = "example-syslog-policy"
-  format = "rfc5424"
-  filter = ["INFO", "WARNING"]
+  format = "syslog-rfc5424"
+  filter = ["all"]
 
   syslogconfig {
-    facility         = "local0"
+    facility         = "user"
     disable_batching = false
   }
 
@@ -22,13 +22,39 @@ resource "psm_syslog_policy" "example" {
   }
 
   targets {
-    destination = "192.168.1.100:514"
-    transport   = "udp"
+    destination = "10.10.10.10"
+    transport   = "udp/514"
   }
 
   targets {
-    destination = "syslog.example.com:6514"
-    transport   = "tcp"
+    destination = "10.10.10.11"
+    transport   = "udp/5514"
+  }
+}
+```
+
+```hcl
+resource "psm_syslog_export_policy" "example_tls" {
+  name   = "example-syslog-policy_tls"
+  format = "syslog-rfc5424"
+  filter = ["all"]
+
+  syslogconfig {
+    facility         = "user"
+    disable_batching = false
+  }
+
+  psm_target {
+    enable = true
+  }
+
+  targets {
+    destination = "192.168.61.210"
+    transport   = "tcp/5514"
+    trusted_certs = "Server_EC_CA"
+    client_certificate = "Client_RSA_Cert"
+    hostname_verification = "SyslogServerName"
+    skip_cert_verification = false
   }
 }
 ```
@@ -39,20 +65,34 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the Syslog Policy. This must be unique within the tenant.
 
-* `format` - (Required) The format of the syslog messages.
+* `format` - (Required) The format of the syslog messages.  
+Possible values: `syslog-rfc5424`, `syslog-bsd`.  
+Default: `syslog-bsd`
 
-* `filter` - (Required) A list of filter strings to apply to the syslog messages.
+* `filter` - (Required) A list of filter strings to apply to the syslog messages.  
+Possible values: `all`, `allow`, `deny`.  
+Default: `all`
 
 * `syslogconfig` - (Required) A block to specify syslog configuration. It supports:
-    * `facility` - (Required) The syslog facility to use.
-    * `disable_batching` - (Required) Whether to disable batching of syslog messages.
+    * `facility` - (Required) The syslog facility to use.  
+Possible values: `kernel`,` user`, `mail`, `daemon`, `auth`, `syslog`, `lpr`, `news`, `uucp`, `cron`, `authpriv`, `ftp`, `local0`, `local1`, `local2`, `local3`, `local4`, `local5`, `local6`, `local7`
+    * `disable_batching` - (Required) Whether to disable batching of syslog messages.  
+Possible values: `true`, `false`.
 
 * `psm_target` - (Optional) A block to specify PSM target configuration. It supports:
-    * `enable` - (Required) Whether to enable the PSM target.
+    * `enable` - (Required) Whether to enable the PSM target.  
+Possible values: `true`, `false`.
 
 * `targets` - (Required) A list of target blocks. Each block supports:
-    * `destination` - (Required) The destination for syslog messages.
+    * `destination` - (Required) The destination for syslog messages (IP address notation).
     * `transport` - (Required) The transport protocol to use (e.g., "udp" or "tcp").
+    * `trusted_certs` - (Optional) The server certificate.
+    * `client_certificate` - (Optional) The client certificate.
+    * `hostname_verification` - (Optional) The SAN name of the server certificate.
+    * `skip_cert_verification` - (Optional) Verify SAN name in server certificate.
+      Possible values: `true`, `false`.
+
+-> Up to 4 syslog targets can be configured.
 
 ### Attribute Reference
 
@@ -65,18 +105,5 @@ In addition to all arguments above, the following attributes are exported:
 Syslog Policies can be imported using the `name`, e.g.,
 
 ```
-$ terraform import psm_syslog_policy.example example-syslog-policy
+$ terraform import psm_syslog_export_policy.example example-syslog-policy
 ```
-
-### Notes
-
-* The resource supports full CRUD operations (Create, Read, Update, Delete).
-* All operations are performed in the context of the "default" tenant.
-* The `Read` operation populates the Terraform state with the current configuration of the Syslog Policy.
-
-### Error Handling
-
-* If the API returns a non-200 status code during any operation, the provider will return an error with details about the failed operation, including the HTTP status code and response body.
-* Network errors or issues with JSON marshalling/unmarshalling will also result in an error being returned.
-
-This resource allows for comprehensive management of Syslog Policies in PSM. It provides options to configure syslog message format, filtering, facility settings, and multiple targets for syslog message delivery.

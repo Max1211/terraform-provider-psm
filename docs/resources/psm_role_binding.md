@@ -2,18 +2,38 @@
 
 ## Resource: psm_role_binding
 
-The `psm_role_binding` resource allows you to manage Role Bindings in PSM (Pensando Service Mesh).
+The `psm_role_binding` resource allows you to manage Role Bindings in the PSM system.
 
 ### Example Usage
 
 ```hcl
 resource "psm_role_binding" "example" {
   name       = "example-role-binding"
-  tenant     = "my-tenant"
-  namespace  = "my-namespace"
-  role       = "reader"
-  users      = ["user1@example.com", "user2@example.com"]
-  user_groups = ["group1", "group2"]
+  role       = "AdminRole"
+  users      = ["user1", "user2"]
+}
+```
+<br />  
+
+  ->
+  The `user_groups` attribute is the link between the LDAP group distinguished name (DN) or radius group name.
+### Example Usage with LDAP authentication
+
+```hcl
+resource "psm_role_binding" "admin_ldap" {
+  name        = "example-ldap-role-binding"
+  role        = "AdminRole"
+  user_groups = ["CN=example-user,CN=Builtin,DC=example,DC=com"]
+}
+```
+
+### Example Usage with RADIUS authentication
+
+```hcl
+resource "psm_role_binding" "admin_radius" {
+  name        = "example-radius-role-binding"
+  role        = "AdminRole"
+  user_groups = ["PSM-ReadOnly"]
 }
 ```
 
@@ -46,16 +66,3 @@ Role Bindings can be imported using the `tenant/name` format, e.g.,
 ```
 $ terraform import psm_role_binding.example my-tenant/example-role-binding
 ```
-
-### Notes
-
-* The `Kind` and `APIVersion` fields are automatically set to "RoleBindingList" and "v1" respectively.
-* The resource supports full CRUD operations (Create, Read, Update, Delete).
-* When updating a Role Binding, all fields (except `name` and `tenant`) can be modified.
-
-### Error Handling
-
-* If the API returns a non-200 status code during any operation, the provider will return an error with details about the failed operation, including the HTTP status code and response body.
-* Network errors or issues with JSON marshalling/unmarshalling will also result in an error being returned.
-
-This resource allows for comprehensive management of Role Bindings in PSM. It provides flexibility in assigning roles to both individual users and user groups within specific tenants and namespaces.
