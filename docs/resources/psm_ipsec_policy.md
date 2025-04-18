@@ -168,7 +168,7 @@ The following arguments are supported:
     * `dse` - (Required) The DSE (Distributed Services Engine, CX 10000 DSS-ID) for this endpoint.
     * `ike_version` - (Required) The IKE version to use. Default is "`ikev2`.  
       Possible values: `prefer_ikev2_support_ikev1`, `ikev1`, `ikev2`.
-    * `ike_sa` - (Required) IKE Security Association configuration. 
+    * `ike_sa` - (Required) IKE Security Association configuration.
     * `ipsec_sa` - (Required) IPSec Security Association configuration.
     * `local_identifier` - (Required) Local identifier configuration.
     * `remote_identifier` - (Required) Remote identifier configuration.
@@ -181,7 +181,7 @@ The following arguments are supported:
 * `encryption_algorithms` - (Required) List of encryption algorithms. Default is "`aes_128`.  
   Possible values:  `aes_128`, `aes_256`, `triple_des`, `cast_128`, `aes_gcm_128`, `aes_gcm_256`.
 * `hash_algorithms` - (Required) List of hash algorithms. Default is `sha_256`.  
-Possible values: `sha_256`, `sha_512`, `sha_384`. 
+Possible values: `sha_256`, `sha_512`, `sha_384`.
 * `dh_groups` - (Required) List of Diffie-Hellman groups. Default is `group1`.  
 Possible values: `group1`, `group2`, `group5`, `group14`, `group15`, `group19`, `group20`.
 * `rekey_lifetime` - (Required) Rekey lifetime. Default is "8h".  
@@ -191,7 +191,7 @@ Should be a valid time duration between 15m0s and 24h0m0s.
 Possible values such as: "24h", 2h45m. Valid time units are "s", "m", "h".  
 Should be a valid time duration between 1h0m0s and 24h0m0s.
 * `dpd_delay` - (Required) Dead Peer Detection delay. Default is "60s".  
-Possible values such as: "24h", 2h45m. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". 
+Possible values such as: "24h", 2h45m. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 Should be a valid time duration between 1m0s and 1h0m0s.
 * `ikev1_dpd_timeout` - (Required) IKEv1 Dead Peer Detection timeout. Default is "180s".  
 Possible values such as: "180s" or "2h45m". Valid time units are "s", "m", "h"
@@ -221,7 +221,7 @@ Possible values: `keyid`, `ip`, `fqdn`, `email`.
 
 ### `lifetime`
 
-* `sa_lifetime` - (Required) Security Association lifetime. Default is "8h".   
+* `sa_lifetime` - (Required) Security Association lifetime. Default is "8h".
 Possible values such as: "1h" or "2h45m". Valid time units are "s", "m", "h"
 Should be a valid time duration between 1h0m0s and 24h0m0s.
 * `ike_lifetime` - (Required) IKE lifetime. Default is "24h".  
@@ -240,6 +240,6 @@ In addition to all arguments above, the following attributes are exported:
 
 IPSec policies can be imported using the `id`, e.g.,
 
-```
-$ terraform import psm_ipsec_policy.example 12345678-1234-1234-1234-123456789012
+```text
+terraform import psm_ipsec_policy.example 12345678-1234-1234-1234-123456789012
 ```

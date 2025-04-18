@@ -63,6 +63,7 @@ The following arguments are supported:
 * `token_expiry` - (Optional) The expiration time for authentication tokens. Default is "144h".  
 
 -> When LDAP or RADIUS resources are defined, they must be defined in the `authentication_order`.
+
 * `authenticator_order` - (Optional) The order in which authentication methods are tried. Valid values are "local", "ldap", and "radius".
 
 * `local` - (Optional) Configuration for local authentication.
@@ -91,8 +92,9 @@ The following arguments are supported:
       * `trusted_certs` - (Optional) Trusted certificates for LDAP server verification.  
 
 -> `skip_server_cert_verification` "false" requires the use of `start_tls`.
-  * `tag` - (Optional) A tag for the LDAP configuration.
-  * `skip_nested_groups` - (Optional) Whether to skip nested group resolution.
+
+* `tag` - (Optional) A tag for the LDAP configuration.
+* `skip_nested_groups` - (Optional) Whether to skip nested group resolution.
 
 * `radius` - (Optional) Configuration for RADIUS authentication. Can be specified multiple times for multiple RADIUS domains.
   * `nas_id` - (Required) The NAS identifier for RADIUS requests.
@@ -113,6 +115,6 @@ In addition to all arguments above, the following attributes are exported:
 
 The authentication policy can be imported using a placeholder ID:
 
-```
-$ terraform import psm_authpolicy.example authn-policy
+```text
+terraform import psm_authpolicy.example authn-policy
 ```

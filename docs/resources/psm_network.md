@@ -63,6 +63,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Networks can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_network.example example-network
+```text
+terraform import psm_network.example example-network
 ```

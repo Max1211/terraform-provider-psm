@@ -67,8 +67,8 @@ In addition to the arguments listed above, the following computed attributes are
 
 Distributed Service Switchs can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_distributed_service_Switch.example example-DSS
+```text
+terraform import psm_distributed_service_Switch.example example-DSS
 ```
 
 ## Notes

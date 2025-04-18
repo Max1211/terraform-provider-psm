@@ -31,6 +31,7 @@ Each `rule` block supports the following arguments:
   
 -> Omitting `source`, `destination`, `translated_source` and / or `translated_destination` defaults to an empty value which is translated to "any".  
 For the sake of completeness using the value "any" is supported, having the same effect.
+
 * `source` - (Optional) Source address configuration. See [Address Configuration](#address-configuration) below.
 * `destination` - (Optional) Destination address configuration. See [Address Configuration](#address-configuration) below.
 * `destination_proto_port` - (Optional) Protocol and port configuration. See [Protocol and Port Configuration](#protocol-and-port-configuration) below.
@@ -326,6 +327,6 @@ resource "psm_nat_policy" "multi_rule_dnat_example" {
 
 To import an existing NAT policy into Terraform, use the following command:
 
-```
+```text
 terraform import psm_nat_policy.example <policy_id>
 ```

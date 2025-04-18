@@ -53,6 +53,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Mirror Sessions can be imported using the name, e.g.,
 
-```
-$ terraform import psm_mirror_session.example traffic-monitoring
+```text
+terraform import psm_mirror_session.example traffic-monitoring
 ```

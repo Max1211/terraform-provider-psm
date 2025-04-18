@@ -21,14 +21,14 @@ The following arguments are supported:
 * `name` - (Required) The name of the Rule Profile. This must be unique within the tenant.
 
 * `conn_track` - (Optional) The connection tracking mode. Valid values are:
-  - `"inherit"` (default)
-  - `"enable"`
-  - `"disable"`
+  * `"inherit"` (default)
+  * `"enable"`
+  * `"disable"`
 
 * `allow_session_reuse` - (Optional) Whether to allow session reuse. Valid values are:
-  - `"inherit"` (default)
-  - `"enable"`
-  - `"disable"`
+  * `"inherit"` (default)
+  * `"enable"`
+  * `"disable"`
 
 ### Attribute Reference
 
@@ -40,6 +40,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Rule Profiles can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_rule_profile.example example-rule-profile
+```text
+terraform import psm_rule_profile.example example-rule-profile
 ```

@@ -50,6 +50,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Flow Export Policies can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_flow_export_policy.example example-policy
+```text
+terraform import psm_flow_export_policy.example example-policy
 ```

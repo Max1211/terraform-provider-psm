@@ -20,6 +20,7 @@ resource "psm_hosts" "example_dss" {
 ```
 
 ## Example Usage PNIC
+
 ```hcl
 resource "psm_hosts" "example_pnic" {
   name          = "pnic-host-example"
@@ -47,6 +48,7 @@ resource "psm_hosts" "example_pnic" {
 ```
 
 ## Example Usage combined (DSS and PNIC)
+
 ```hcl
 resource "psm_hosts" "example_combined_host" {
   name  = "combined-host-example"
@@ -72,11 +74,11 @@ The following arguments are supported:
 
 * `name` - (Required, ForceNew) The name of the host.
 * `dscs` - (Optional) A set of DSC (Distributed Services Card) configurations.
-    * `id` - (Optional) The ID of the DSC.
-    * `mac_address` - (Optional) The MAC address of the DSC.
+  * `id` - (Optional) The ID of the DSC.
+  * `mac_address` - (Optional) The MAC address of the DSC.
 * `pnic_info` - (Optional) A set of PNIC (Physical Network Interface Card) configurations.
-    * `mac_address` - (Required) The MAC address of the PNIC.
-    * `name` - (Required) The name of the PNIC.
+  * `mac_address` - (Required) The MAC address of the PNIC.
+  * `name` - (Required) The name of the PNIC.
 
 ## Attribute Reference
 
@@ -88,6 +90,6 @@ In addition to the arguments above, the following attributes are exported:
 
 Hosts can be imported using the `name`, e.g.
 
-```
-$ terraform import psm_hosts.example <name>
+```text
+terraform import psm_hosts.example <name>
 ```

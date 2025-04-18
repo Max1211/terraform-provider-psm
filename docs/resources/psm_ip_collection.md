@@ -70,6 +70,6 @@ In addition to all arguments above, the following attributes are exported:
 
 IP Collections can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_ip_collection.example example-ip-collection
+```text
+terraform import psm_ip_collection.example example-ip-collection
 ```

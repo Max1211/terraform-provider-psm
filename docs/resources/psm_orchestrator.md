@@ -58,7 +58,7 @@ Default: `vcenter`.
 
 * `ca_data` - (Optional) The CA certificate data for server authentication.
 
-* `disable_server_authentication` - (Optional) Whether to disable server authentication. 
+* `disable_server_authentication` - (Optional) Whether to disable server authentication.
 Defaults to `true` if `ca_data` is not provided.
 
 * `namespaces` - (Optional) A list of namespace configurations. If not provided, a default namespace "all_namespaces" with mode "smartservicemonitored" will be used. Each namespace block supports:
@@ -75,6 +75,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Orchestrator integrations can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_orchestrator.example example-orchestrator
+```text
+terraform import psm_orchestrator.example example-orchestrator
 ```

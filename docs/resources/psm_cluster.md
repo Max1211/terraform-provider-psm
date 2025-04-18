@@ -56,8 +56,8 @@ In addition to all arguments above, the following attributes are exported:
 
 Cluster can be imported using a placeholder ID, e.g.,
 
-```
-$ terraform import psm_cluster.example cluster
+```text
+terraform import psm_cluster.example cluster
 ```
 
 This will import the existing cluster configuration into your Terraform state.
