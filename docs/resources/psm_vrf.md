@@ -41,6 +41,7 @@ The following arguments are supported:
 * `egress_security_policy` - (Optional) A list of egress security policies to apply to the VRF.  
 
 -> If several security policies are bound, each must be for a separate PDT (Policy Distribution Target)
+
 * `connection_tracking_mode` - (Optional) The connection tracking mode for the VRF.  
 Defaults to enable.
 * `allow_session_reuse` - (Optional) Whether to allow session reuse for the VRF.  
@@ -52,6 +53,7 @@ Defaults to disable
 * `ipsec_policy` - (Optional) A list of IPsec policies to apply to the VRF.  
 
 -> Binding NAT or IPSec policies requires the CX 10000 to be in BL (Border Leaf) mode.
+
 * `flow_export_policy` - (Optional) A list of flow export policies to apply to the VRF.
 * `maximum_cps_per_network` - (Optional) The maximum connections per second (CPS) per network for the VRF.  
 Defaults to 0 (unlimited).
@@ -69,5 +71,5 @@ In addition to all arguments above, the following attributes are exported:
 VRF instances can be imported using the `name`, e.g.,
 
 ```
-$ terraform import psm_vrf.example example-vrf
+terraform import psm_vrf.example example-vrf
 ```

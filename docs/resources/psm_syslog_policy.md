@@ -74,22 +74,22 @@ Possible values: `all`, `allow`, `deny`.
 Default: `all`
 
 * `syslogconfig` - (Required) A block to specify syslog configuration. It supports:
-    * `facility` - (Required) The syslog facility to use.  
-Possible values: `kernel`,` user`, `mail`, `daemon`, `auth`, `syslog`, `lpr`, `news`, `uucp`, `cron`, `authpriv`, `ftp`, `local0`, `local1`, `local2`, `local3`, `local4`, `local5`, `local6`, `local7`
-    * `disable_batching` - (Required) Whether to disable batching of syslog messages.  
+  * `facility` - (Required) The syslog facility to use.  
+Possible values: `kernel`,`user`, `mail`, `daemon`, `auth`, `syslog`, `lpr`, `news`, `uucp`, `cron`, `authpriv`, `ftp`, `local0`, `local1`, `local2`, `local3`, `local4`, `local5`, `local6`, `local7`
+  * `disable_batching` - (Required) Whether to disable batching of syslog messages.  
 Possible values: `true`, `false`.
 
 * `psm_target` - (Optional) A block to specify PSM target configuration. It supports:
-    * `enable` - (Required) Whether to enable the PSM target.  
+  * `enable` - (Required) Whether to enable the PSM target.  
 Possible values: `true`, `false`.
 
 * `targets` - (Required) A list of target blocks. Each block supports:
-    * `destination` - (Required) The destination for syslog messages (IP address notation).
-    * `transport` - (Required) The transport protocol to use (e.g., "udp" or "tcp").
-    * `trusted_certs` - (Optional) The server certificate.
-    * `client_certificate` - (Optional) The client certificate.
-    * `hostname_verification` - (Optional) The SAN name of the server certificate.
-    * `skip_cert_verification` - (Optional) Verify SAN name in server certificate.
+  * `destination` - (Required) The destination for syslog messages (IP address notation).
+  * `transport` - (Required) The transport protocol to use (e.g., "udp" or "tcp").
+  * `trusted_certs` - (Optional) The server certificate.
+  * `client_certificate` - (Optional) The client certificate.
+  * `hostname_verification` - (Optional) The SAN name of the server certificate.
+  * `skip_cert_verification` - (Optional) Verify SAN name in server certificate.
       Possible values: `true`, `false`.
 
 -> Up to 4 syslog targets can be configured.
@@ -104,6 +104,6 @@ In addition to all arguments above, the following attributes are exported:
 
 Syslog Policies can be imported using the `name`, e.g.,
 
-```
-$ terraform import psm_syslog_export_policy.example example-syslog-policy
+```text
+terraform import psm_syslog_export_policy.example example-syslog-policy
 ```

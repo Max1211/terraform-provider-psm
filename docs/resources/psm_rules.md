@@ -145,22 +145,22 @@ The following arguments are supported:
 * `tenant` - (Optional) The tenant for the policy. Defaults to "default".
 * `address_family` - (Optional) The address family of the security policy. Defaults to "IPv4".
   Possible values: `IPv4`, `IPv6`.
-    * `rule_name` - (Optional) The name of the rule.
-    * `action` - (Required) The action to take. Must be either "permit" or "deny".
-    * `description` - (Optional) A description of the rule.
-    * `apps` - (Optional) A list of applications the rule applies to.
-    * `disable` - (Optional) Whether the rule is disabled. Defaults to false.
-    * `from_ip_addresses` - (Optional) A list of source IP addresses or CIDRs.
-    * `to_ip_addresses` - (Optional) A list of destination IP addresses or CIDRs.
-    * `from_ip_collections` - (Optional) A list of source IP collections.
-    * `to_ip_collections` - (Optional) A list of destination IP collections.
-    * `from_workloadgroups` - (Optional) A list of source workload groups.
-    * `to_workloadgroups` - (Optional) A list of destination workload groups.
-    * `rule_profile` - (Optional) The profile for the rule.
-    * `proto_ports` - (Optional) A list of protocol and port combinations. Each block supports:
-        * `protocol` - (Required) The protocol (e.g., "tcp", "udp").
-        * `ports` - (Optional) The port or port range.
-    * `labels` - (Optional) A map of key/value labels for the rule.
+  * `rule_name` - (Optional) The name of the rule.
+  * `action` - (Required) The action to take. Must be either "permit" or "deny".
+  * `description` - (Optional) A description of the rule.
+  * `apps` - (Optional) A list of applications the rule applies to.
+  * `disable` - (Optional) Whether the rule is disabled. Defaults to false.
+  * `from_ip_addresses` - (Optional) A list of source IP addresses or CIDRs.
+  * `to_ip_addresses` - (Optional) A list of destination IP addresses or CIDRs.
+  * `from_ip_collections` - (Optional) A list of source IP collections.
+  * `to_ip_collections` - (Optional) A list of destination IP collections.
+  * `from_workloadgroups` - (Optional) A list of source workload groups.
+  * `to_workloadgroups` - (Optional) A list of destination workload groups.
+  * `rule_profile` - (Optional) The profile for the rule.
+  * `proto_ports` - (Optional) A list of protocol and port combinations. Each block supports:
+    * `protocol` - (Required) The protocol (e.g., "tcp", "udp").
+    * `ports` - (Optional) The port or port range.
+  * `labels` - (Optional) A map of key/value labels for the rule.
 
 ### Attribute Reference
 
@@ -173,7 +173,7 @@ In addition to all arguments above, the following attributes are exported:
 Network Security Policies can be imported using the `id`, e.g.,
 
 ```
-$ terraform import psm_rules.example &lt;policy-uuid&gt;
+terraform import psm_rules.example &lt;policy-uuid&gt;
 ```
 
 Note: The import ID should be the UUID of the Network Security Policy, not its name.
