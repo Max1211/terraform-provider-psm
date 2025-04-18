@@ -29,21 +29,13 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
 
-      # Create terraform-registry-manifest.json
-      - name: Prepare Terraform Registry manifest
+      # Use existing terraform-registry-manifest.json file
+      - name: Check for terraform-registry-manifest.json
         run: |
-          cat > terraform-registry-manifest.json << EOF
-          {
-            "version": 1,
-            "metadata": {
-              "protocol_versions": ["5.0"]
-            }
-          }
-          EOF
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git add terraform-registry-manifest.json
-          git commit -m "Add terraform registry manifest for release [skip ci]"
+          if [ ! -f terraform-registry-manifest.json ]; then
+            echo "terraform-registry-manifest.json not found in repository"
+            exit 1
+          fi
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
