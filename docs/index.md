@@ -16,7 +16,7 @@ terraform {
   required_providers {
     psm = {
       source = "Max1211/psm"
-      version = "0.5.13" # Use the latest version available
+      version = "0.5.14" # Use the latest version available
     }
   }
 }
