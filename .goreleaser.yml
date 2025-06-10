@@ -1,13 +1,5 @@
 version: 1
 
-archives:
-  - id: terraform-provider
-    files:
-      - src: 'LICENSE'
-        dst: 'LICENSE.txt'
-    formats: [ 'zip' ]
-    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-
 builds:
   - id: provider
     binary: '{{ .ProjectName }}_v{{ .Version }}'
@@ -36,6 +28,14 @@ builds:
       - -s -w -X main.version={{.Version}}
     mod_timestamp: '{{ .CommitTimestamp }}'
 
+archives:
+  - id: terraform-provider
+    files:
+      - src: 'LICENSE'
+        dst: 'LICENSE.txt'
+    format: zip
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
@@ -61,4 +61,4 @@ release:
       name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
 
 snapshot:
-  version_template: "{{ .Tag }}-next"
+  name_template: "{{ .Tag }}-next"
