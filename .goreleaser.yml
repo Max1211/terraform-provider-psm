@@ -10,7 +10,7 @@ archives:
 
 builds:
   - id: provider
-    binary: '{{ .ProjectName }}_v{{ .Version }}_x5'
+    binary: '{{ .ProjectName }}_v{{ .Version }}'
     env:
       - CGO_ENABLED=0
     flags:
